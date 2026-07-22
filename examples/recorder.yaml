@@ -1,0 +1,13 @@
+# Home Assistant's recorder defaults to a short retention window (10 days),
+# which is shorter than what the "last month" SQL sensors in sql_sensors.yaml
+# need to see reliably -- their window functions look back across the whole
+# of last month, which can be up to ~31 days away from "now".
+#
+# Extend retention so the SQL sensors always have enough history to compute
+# a complete "last month" figure, even when queried on the 1st of the month.
+#
+# NOTE: unlike most of the other domains touched in this repo/toolkit,
+# `recorder:` changes are NOT hot-reloadable via a `<domain>.reload` service
+# call -- they require a full Home Assistant restart to take effect.
+recorder:
+  purge_keep_days: 40

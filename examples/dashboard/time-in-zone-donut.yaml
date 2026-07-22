@@ -1,0 +1,19 @@
+# Requires the `apexcharts-card` custom card (via HACS).
+# Labels below are intentionally generic placeholders (Person A/B, Zone 1-3)
+# -- swap in your own person/zone names, but keep them out of any PR you
+# contribute back to this repo (see CONTRIBUTING.md).
+type: custom:apexcharts-card
+header:
+  show: true
+  title: "Time in Zone - Person A (this month)"
+chart_type: donut
+series:
+  - entity: sensor.zone_time_person_a_this_month
+    type: donut
+    data_generator: |
+      const data = JSON.parse(entity.state);
+      return Object.entries(data).map(([zone, seconds]) => {
+        return [zone, Math.round(seconds / 3600 * 10) / 10];
+      });
+show:
+  legend_value: true

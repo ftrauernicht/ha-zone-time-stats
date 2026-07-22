@@ -1,0 +1,25 @@
+name: Validate examples
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    # Job name must stay "Validate examples" -- it's the required branch
+    # protection status check, and matches the name used across sibling
+    # repos in the hassio-* toolkit.
+    name: Validate examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jinja2
+      - name: Lint YAML/Jinja syntax
+        run: python scripts/validate_examples.py
+      - name: Hex encode/decode round-trip test
+        run: python scripts/decode_archive_example.py

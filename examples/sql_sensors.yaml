@@ -1,0 +1,113 @@
+# Per-person "time spent in each zone" statistics, computed purely via the
+# core `sql:` platform against the recorder database (SQLite by default).
+# No pyscript, no AppDaemon, no custom integration required.
+#
+# Onboarding a new tracked person:
+#   1. Duplicate the two sensors for one existing person (this-month + last-month).
+#   2. Replace every `person.person_a` / `person.person_b` reference with the
+#      new person's entity_id.
+#   3. Give the two new sensors their own `unique_id`.
+#   4. Add the two new sensors to the monthly archive automation in
+#      `examples/automations/monthly-archive.yaml`.
+#
+# Requires `recorder: purge_keep_days` to be large enough to cover "last
+# month" reliably -- see `examples/recorder.yaml`.
+
+sql:
+  - name: "Zone Time Person A This Month"
+    unique_id: zone_time_person_a_this_month
+    query: >-
+      WITH changes AS (
+        SELECT
+          s.state AS zone,
+          s.last_updated_ts AS started_ts,
+          LEAD(s.last_updated_ts) OVER (ORDER BY s.last_updated_ts) AS ended_ts
+        FROM states s
+        JOIN states_meta sm ON s.metadata_id = sm.metadata_id
+        WHERE sm.entity_id = 'person.person_a'
+          AND s.last_updated_ts >= strftime('%s', 'now', 'start of month')
+      )
+      SELECT json_group_object(zone, total_seconds) AS result
+      FROM (
+        SELECT
+          zone,
+          SUM(COALESCE(ended_ts, strftime('%s', 'now')) - started_ts) AS total_seconds
+        FROM changes
+        GROUP BY zone
+      )
+    column: "result"
+    scan_interval: 3600
+
+  - name: "Zone Time Person A Last Month"
+    unique_id: zone_time_person_a_last_month
+    query: >-
+      WITH changes AS (
+        SELECT
+          s.state AS zone,
+          s.last_updated_ts AS started_ts,
+          LEAD(s.last_updated_ts) OVER (ORDER BY s.last_updated_ts) AS ended_ts
+        FROM states s
+        JOIN states_meta sm ON s.metadata_id = sm.metadata_id
+        WHERE sm.entity_id = 'person.person_a'
+          AND s.last_updated_ts >= strftime('%s', 'now', 'start of month', '-1 month')
+          AND s.last_updated_ts < strftime('%s', 'now', 'start of month')
+      )
+      SELECT json_group_object(zone, total_seconds) AS result
+      FROM (
+        SELECT
+          zone,
+          SUM(COALESCE(ended_ts, strftime('%s', 'now', 'start of month')) - started_ts) AS total_seconds
+        FROM changes
+        GROUP BY zone
+      )
+    column: "result"
+    scan_interval: 3600
+
+  - name: "Zone Time Person B This Month"
+    unique_id: zone_time_person_b_this_month
+    query: >-
+      WITH changes AS (
+        SELECT
+          s.state AS zone,
+          s.last_updated_ts AS started_ts,
+          LEAD(s.last_updated_ts) OVER (ORDER BY s.last_updated_ts) AS ended_ts
+        FROM states s
+        JOIN states_meta sm ON s.metadata_id = sm.metadata_id
+        WHERE sm.entity_id = 'person.person_b'
+          AND s.last_updated_ts >= strftime('%s', 'now', 'start of month')
+      )
+      SELECT json_group_object(zone, total_seconds) AS result
+      FROM (
+        SELECT
+          zone,
+          SUM(COALESCE(ended_ts, strftime('%s', 'now')) - started_ts) AS total_seconds
+        FROM changes
+        GROUP BY zone
+      )
+    column: "result"
+    scan_interval: 3600
+
+  - name: "Zone Time Person B Last Month"
+    unique_id: zone_time_person_b_last_month
+    query: >-
+      WITH changes AS (
+        SELECT
+          s.state AS zone,
+          s.last_updated_ts AS started_ts,
+          LEAD(s.last_updated_ts) OVER (ORDER BY s.last_updated_ts) AS ended_ts
+        FROM states s
+        JOIN states_meta sm ON s.metadata_id = sm.metadata_id
+        WHERE sm.entity_id = 'person.person_b'
+          AND s.last_updated_ts >= strftime('%s', 'now', 'start of month', '-1 month')
+          AND s.last_updated_ts < strftime('%s', 'now', 'start of month')
+      )
+      SELECT json_group_object(zone, total_seconds) AS result
+      FROM (
+        SELECT
+          zone,
+          SUM(COALESCE(ended_ts, strftime('%s', 'now', 'start of month')) - started_ts) AS total_seconds
+        FROM changes
+        GROUP BY zone
+      )
+    column: "result"
+    scan_interval: 3600

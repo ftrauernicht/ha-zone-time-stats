@@ -1,0 +1,54 @@
+# Monthly archive of the rolling "this month / last month" SQL sensors from
+# ../sql_sensors.yaml into a permanent, append-only JSONL file. The sensors
+# themselves only ever show a rolling window -- anything older than "last
+# month" is gone unless it's archived somewhere else first.
+#
+# THE HARD PART: getting a JSON payload (which contains embedded double
+# quotes) safely through `shell_command:` without a shell-quoting bug. See
+# docs/home-assistant-setup.md for the full story of what does NOT work and
+# why. Summary of the fix: encode the whole payload as a hex string first
+# (verified against a live Home Assistant instance -- see README), so only
+# `0-9a-f` characters ever cross the shell boundary, then decode it with
+# python3 (guaranteed present in the HA core container) instead of letting
+# the shell interpret the payload directly.
+
+shell_command:
+  append_zone_stats_archive: >-
+    python3 -c "import sys, json;
+    data = bytes.fromhex(sys.argv[1]).decode('utf-8');
+    open('/config/zone_stats_archive.jsonl', 'a').write(data + chr(10))"
+    {{ payload_hex }}
+
+automation:
+  - alias: "Zone Stats - Monthly Archive"
+    description: >-
+      Archives last month's per-person zone-time stats to
+      /config/zone_stats_archive.jsonl on the 1st of each month. Add a new
+      person? Add their two SQL sensors (see sql_sensors.yaml) to both the
+      `homeassistant.update_entity` call below and the `payload` template.
+    triggers:
+      - trigger: time
+        at: "00:05:00"
+    conditions:
+      - condition: template
+        value_template: "{{ now().day == 1 }}"
+    actions:
+      - action: homeassistant.update_entity
+        target:
+          entity_id:
+            - sensor.zone_time_person_a_last_month
+            - sensor.zone_time_person_b_last_month
+      - delay:
+          seconds: 5
+      - variables:
+          archive_month: "{{ (now() - timedelta(days=1)).strftime('%Y-%m') }}"
+          payload: >-
+            {{ {
+              "month": archive_month,
+              "person_a": states.sensor.zone_time_person_a_last_month.state | from_json,
+              "person_b": states.sensor.zone_time_person_b_last_month.state | from_json,
+            } | to_json }}
+          payload_hex: "{{ payload.encode('utf-8').hex() }}"
+      - action: shell_command.append_zone_stats_archive
+        data:
+          payload_hex: "{{ payload_hex }}"
