@@ -1,4 +1,4 @@
-# hassio-zone-time-stats
+# ha-zone-time-stats
 
 Per-person "how long did I spend in each zone this month" statistics for Home Assistant — computed purely with the core `sql:` platform against the recorder database. No pyscript, no AppDaemon, no custom integration.
 
@@ -24,9 +24,9 @@ See [`docs/home-assistant-setup.md`](docs/home-assistant-setup.md) for the full 
 
 ## Related
 
-- [hassio-sun-blind-automation](https://github.com/ftrauernicht/hassio-sun-blind-automation) — a different repo in this toolkit that also needs to know "who/whether someone is home" (for its away-mode automation), though that's a live presence check rather than this repo's historical dwell-time tracking.
+- [ha-sun-blind-automation](https://github.com/ftrauernicht/ha-sun-blind-automation) — a different repo in this toolkit that also needs to know "who/whether someone is home" (for its away-mode automation), though that's a live presence check rather than this repo's historical dwell-time tracking.
 
-Part of the `hassio-*` Home Assistant toolkit — see also [hassio-dashboard-recipes](https://github.com/ftrauernicht/hassio-dashboard-recipes).
+Part of the `ha-*` Home Assistant toolkit — see also [ha-dashboard-recipes](https://github.com/ftrauernicht/ha-dashboard-recipes).
 
 ## Contributing
 

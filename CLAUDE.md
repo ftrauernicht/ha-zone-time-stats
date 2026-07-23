@@ -9,7 +9,7 @@ A reference implementation/template for Home Assistant per-person zone-dwell-tim
 ## Hard rules
 
 - **Never commit directly to `main`.** Always work on a branch and open a Pull Request. Branch protection enforces this for everyone including the repo owner.
-- `recorder:` config changes (see `examples/recorder.yaml`) typically require a **full Home Assistant restart** to take effect — unlike most domains in the broader `hassio-*` toolkit, which can hot-reload. Never imply a reload service is sufficient for recorder changes.
+- `recorder:` config changes (see `examples/recorder.yaml`) typically require a **full Home Assistant restart** to take effect — unlike most domains in the broader `ha-*` toolkit, which can hot-reload. Never imply a reload service is sufficient for recorder changes.
 - The archive automation's encode step (`payload.encode('utf-8').hex()` in `examples/automations/monthly-archive.yaml`) and the round-trip test in `scripts/decode_archive_example.py` must be kept in sync. Changing one without the other silently breaks the documented pipeline with no obvious error at the YAML level — the shell side and the HA side never round-trip-test each other in production, only in this repo's CI.
 - Entity IDs and labels in examples must stay generic: `person.person_a`/`person.person_b` for people, numbered placeholders (`Zone 1`, `Zone 2`, `Home`) for zones if a zone name ever needs to appear literally in an example — never real names, real places, or real coordinates, in this repo or in any contributed PR.
 - Run `python scripts/validate_examples.py` and `python scripts/decode_archive_example.py` after any YAML/script edit — both gate merging in CI.
