@@ -10,7 +10,7 @@ jobs:
   validate:
     # Job name must stay "Validate examples" -- it's the required branch
     # protection status check, and matches the name used across sibling
-    # repos in the hassio-* toolkit.
+    # repos in the ha-* toolkit.
     name: Validate examples
     runs-on: ubuntu-latest
     steps:
