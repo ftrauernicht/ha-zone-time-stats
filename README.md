@@ -1,5 +1,9 @@
 # ha-zone-time-stats
 
+[![Validate](https://github.com/ftrauernicht/ha-zone-time-stats/actions/workflows/validate.yml/badge.svg)](https://github.com/ftrauernicht/ha-zone-time-stats/actions/workflows/validate.yml)
+[![Link Check](https://github.com/ftrauernicht/ha-zone-time-stats/actions/workflows/link-check.yml/badge.svg)](https://github.com/ftrauernicht/ha-zone-time-stats/actions/workflows/link-check.yml)
+[![License: MIT](https://img.shields.io/github/license/ftrauernicht/ha-zone-time-stats)](LICENSE)
+
 Per-person "how long did I spend in each zone this month" statistics for Home Assistant — computed purely with the core `sql:` platform against the recorder database. No pyscript, no AppDaemon, no custom integration.
 
 ## How it works
